@@ -9,12 +9,8 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     restart: always
-    networks:
-      my_network:
-        aliases:
-          - db
-    expose:
-      - "3306"
+    volumes:
+      - mysql:/var/lib/mysql
   demo-app:
     container_name: demo-app
     build: .
@@ -23,12 +19,5 @@ services:
     depends_on:
       - db
     restart: always
-    networks:
-      my_network:
-        aliases:
-          - demo-app
-
-networks:
-  my_network:
-    name: my_network
-    driver: bridge
+volumes:
+  mysql:
