@@ -15,7 +15,7 @@ public class Counter {
 
     public Counter() {}
 
-    private Counter(Long id, int counter) {
+    public Counter(Long id, int counter) {
         this.id = id;
         this.counter = counter;
     }

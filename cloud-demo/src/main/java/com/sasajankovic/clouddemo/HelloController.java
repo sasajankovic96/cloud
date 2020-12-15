@@ -17,7 +17,7 @@ public class HelloController {
 
     @GetMapping("hello")
     public String hello() {
-        Counter counter = counterRepository.findById(1l).get().incrementCounter();
+        Counter counter = counterRepository.findById(1l).orElse(new Counter(1l, 0)).incrementCounter();
         counterRepository.save(counter);
         return String.format("%s %d", customEnv, counter.getCounter());
     }
