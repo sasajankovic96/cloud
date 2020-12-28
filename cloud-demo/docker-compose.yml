@@ -1,23 +1,91 @@
-version: '3.5'
+version: "3.5"
 services:
-  db:
-    container_name: db
+  db1:
+    container_name: db1
     image: mysql:5.7
     environment:
       MYSQL_DATABASE: counter
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: user
       MYSQL_PASSWORD: password
-    restart: always
+    restart: on-failure
+    networks:
+      - db1-network
     volumes:
-      - mysql:/var/lib/mysql
-  demo-app:
-    container_name: demo-app
+      - mysql1:/var/lib/mysql
+
+  db2:
+    container_name: db2
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: counter
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    restart: on-failure
+    networks:
+      - db2-network
+    volumes:
+      - mysql2:/var/lib/mysql
+
+  demo-app1:
+    container_name: demo-app1
     build: .
-    ports:
-      - "5050:5050"
     depends_on:
-      - db
-    restart: always
+      - db1
+    restart: on-failure
+    networks:
+      - db1-network
+      - app-network
+    environment:
+      MYSQL_DATABASE: counter
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_PORT: 3306
+      HOST: 5051
+      CUSTOM_ENV: App1
+      DB_NAME: db1
+
+  demo-app2:
+    container_name: demo-app2
+    build: .
+    depends_on:
+      - db2
+    restart: on-failure
+    networks:
+      - db2-network
+      - app-network
+    environment:
+      MYSQL_DATABASE: counter
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_PORT: 3306
+      HOST: 5052
+      CUSTOM_ENV: App2
+      DB_NAME: db2
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    restart: on-failure
+    depends_on:
+      - demo-app1
+      - demo-app2
+    networks:
+      - app-network
 volumes:
-  mysql:
+  mysql1:
+  mysql2:
+networks:
+  db1-network:
+    driver: bridge
+  db2-network:
+    driver: bridge
+  app-network:
+    driver: bridge
